@@ -74,11 +74,12 @@ jobs:
       continue-on-error: true
       uses: 281677160/common@message
  
-    - name: 验证并下载 common.sh
+    - name: 验证并下载脚本
       run: |
         mkdir -p /tmp/common
         curl -fsSL -o /tmp/common/common.sh https://raw.githubusercontent.com/281677160/common/main/common.sh
-        chmod +x /tmp/common/common.sh
+        curl -fsSL -o /tmp/common/upgrade.sh https://raw.githubusercontent.com/281677160/common/main/upgrade.sh
+        chmod +x /tmp/common/*.sh
 
     - name: 验证 REPO_TOKEN
       env:
