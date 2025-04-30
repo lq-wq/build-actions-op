@@ -74,6 +74,25 @@ jobs:
       continue-on-error: true
       uses: 281677160/common@message
  
+    - name: 验证并下载 common.sh
+      run: |
+        mkdir -p /tmp/common
+        curl -fsSL -o /tmp/common/common.sh https://raw.githubusercontent.com/281677160/common/main/common.sh
+        chmod +x /tmp/common/common.sh
+
+    - name: 验证 REPO_TOKEN
+      env:
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        if [[ -z "${REPO_TOKEN}" ]]; then
+          echo "REPO_TOKEN 未设置，请在仓库密钥中配置它。"
+          exit 1
+        fi
+        curl -s -H "Authorization: Bearer ${REPO_TOKEN}" https://api.github.com/repos/281677160/common/releases/tags/API || {
+          echo "REPO_TOKEN 无效或已过期，请检查密钥。"
+          exit 1
+        }
+    
     - name: 运行自定义文件和其他
       uses: 281677160/common@need
         
