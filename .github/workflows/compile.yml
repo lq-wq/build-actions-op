@@ -59,7 +59,7 @@ jobs:
       run: |
         sudo rm -rf /tmp/*
         sudo rm -rf ~/.cache
-        
+              
     - name: 部署编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -129,6 +129,9 @@ jobs:
         restore-keys: |
           npm-cache-${{ runner.os }}-
       
+    - name: 检查磁盘空间
+        run: df -h
+        
     - name: 开始编译固件
       id: compile
       if: steps.package.outcome == 'success'
@@ -139,6 +142,12 @@ jobs:
         echo "date=$(date "+%Y%m%d%H%M%S")" >> ${GITHUB_ENV}
         echo "Tongzhi_Date=$(date +%Y年%m月%d日)" >> ${GITHUB_ENV}
 
+    - name: 清理临时文件
+        run: |
+          sudo rm -rf /tmp/*
+          sudo rm -rf ./build_dir
+          df -h
+          
     - name: 自动打包aarch64系列固件
       if: steps.compile.outcome == 'success' && env.ONLINE_FIRMWARE == 'true'
       uses: 281677160/common@aarch
