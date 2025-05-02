@@ -54,6 +54,11 @@ jobs:
 
     - name: 清理磁盘空间
       run: sudo rm -rf /tmp/* || true
+    
+    - name: 清理工作目录
+      run: |
+        sudo rm -rf /tmp/*
+        sudo rm -rf ~/.cache
         
     - name: 部署编译环境
       env:
