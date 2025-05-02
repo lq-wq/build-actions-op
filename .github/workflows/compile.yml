@@ -52,13 +52,49 @@ jobs:
         remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
         testing: false
 
-    - name: 清理磁盘空间
-      run: sudo rm -rf /tmp/* || true
-    
-    - name: 清理工作目录
+    - name: 检查服务器配置
       run: |
-        sudo rm -rf /tmp/*
-        sudo rm -rf ~/.cache
+        echo "若分配的服务器性能不足，务必及时取消，重新运行！"
+        echo -e "------------------------------- CPU信息 -------------------------------\n"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息: $(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo -e "------------------------------- 内存信息 -------------------------------\n"
+        echo "已安装内存详细信息: "
+        sudo lshw -short -C memory | grep GiB
+        echo -e "\n"
+        echo -e "------------------------------- 磁盘信息 -------------------------------\n"
+        echo -e "磁盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
+        echo "------------------------------- 磁盘详情 -------------------------------\n"
+        df -Th
+
+    - name: 清理磁盘空间
+      run: |
+        sudo rm -rf /usr/local/share/boost /usr/local/share/boost-build
+        sudo apt-get clean
+        sudo apt-get autoremove -y
+    
+    - name: 初始化编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        echo "------------------------------- 更新并安装依赖 -------------------------------"
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /etc/mysql /etc/php /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(cat $GITHUB_WORKSPACE/depends/${{ matrix.os }})
+        wget https://bootstrap.pypa.io/pip/3.6/get-pip.py
+        sudo python3 get-pip.py
+        sudo rm -rf get-pip.py
+        sudo pip install pyelftools
+        echo "------------------------------- 清理Docker镜像和软件 -------------------------------"
+        docker rmi `docker images -q`
+        docker image prune -a -f
+        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* android* || true
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        echo "------------------------------- 设置工作目录及时区 -------------------------------"
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /mnt/workdir
+        sudo chown $USER:$GROUPS /mnt/workdir
               
     - name: 部署编译环境
       env:
@@ -85,20 +121,7 @@ jobs:
         curl -fsSL -o /tmp/common/common.sh https://raw.githubusercontent.com/281677160/common/main/common.sh
         curl -fsSL -o /tmp/common/upgrade.sh https://raw.githubusercontent.com/281677160/common/main/upgrade.sh
         chmod +x /tmp/common/*.sh
-
-    - name: 验证 REPO_TOKEN
-      env:
-        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-      run: |
-        if [[ -z "${REPO_TOKEN}" ]]; then
-          echo "REPO_TOKEN 未设置，请在仓库密钥中配置它。"
-          exit 1
-        fi
-        curl -s -H "Authorization: Bearer ${REPO_TOKEN}" https://api.github.com/repos/281677160/common/releases/tags/API || {
-          echo "REPO_TOKEN 无效或已过期，请检查密钥。"
-          exit 1
-        }
-    
+        
     - name: 运行自定义文件和其他
       uses: 281677160/common@need
         
@@ -134,10 +157,7 @@ jobs:
         sudo rm -rf /tmp/*
         sudo rm -rf ~/.cache
         sudo rm -rf ./build_dir
-        
-    - name: 检查磁盘空间
-      run: df -h
-        
+                
     - name: 开始编译固件
       id: compile
       if: steps.package.outcome == 'success'
@@ -148,6 +168,10 @@ jobs:
         echo "date=$(date "+%Y%m%d%H%M%S")" >> ${GITHUB_ENV}
         echo "Tongzhi_Date=$(date +%Y年%m月%d日)" >> ${GITHUB_ENV}
           
+    - name: 检查磁盘空间
+      if: (!cancelled())
+      run: df -hT
+      
     - name: 清理所有内容
       run: |
         echo "开始清理所有内容..."
