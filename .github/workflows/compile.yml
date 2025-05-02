@@ -122,12 +122,12 @@ jobs:
         make download -j8
     
     - name: 清理旧缓存
-      run: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: npm-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            npm-cache-${{ runner.os }}-
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: npm-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          npm-cache-${{ runner.os }}-
       
     - name: 开始编译固件
       id: compile
