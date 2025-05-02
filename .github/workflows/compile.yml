@@ -136,7 +136,7 @@ jobs:
         sudo rm -rf ./build_dir
         
     - name: 检查磁盘空间
-        run: df -h
+      run: df -h
         
     - name: 开始编译固件
       id: compile
