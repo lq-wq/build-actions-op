@@ -63,14 +63,14 @@ svn co https://github.com/openwrt/packages/trunk/utils/watchcat feeds/packages/u
 
 # 添加APP插件
 # git clone https://github.com/sirpdboy/chatgpt-web.git package/luci-app-chatgpt               # chatgpt-web
-# git clone https://github.com/sirpdboy/luci-theme-kucat.git package/luci-app-kucat            # kucat主题
+git clone https://github.com/sirpdboy/luci-theme-kucat.git package/luci-app-kucat              # kucat主题
 git clone https://github.com/lq-wq/luci-app-quickstart.git package/luci-app-quickstart         # iStoreOS-web
 # git clone https://github.com/sirpdboy/luci-app-lucky.git package/lucky                       # luci-app-lucky 端口转发
 git clone https://github.com/sirpdboy/luci-app-partexp.git package/luci-app-partexp            # 一键分区扩容
 git clone https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan              # 计划任务插件（原定时设置）
 git clone https://github.com/sirpdboy/luci-app-advancedplus.git luci-app-advancedplus          # 酷猫主题设置
 git clone https://github.com/sirpdboy/luci-app-watchdog package/watchdog                       # 看门狗
-git clone https://github.com/gngpp/luci-app-watchcat-plus.git package/luci-app-watchcat-plus # 定时重启
+git clone https://github.com/gngpp/luci-app-watchcat-plus.git package/luci-app-watchcat-plus   # 定时重启
 
 # 晶晨CPU系列打包固件设置(不懂请看说明)
 export amlogic_model="s905d"
